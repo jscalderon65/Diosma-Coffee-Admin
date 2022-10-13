@@ -1,25 +1,21 @@
 <template>
-    <div>
-      <v-container>
-        <v-card elevcation="2" class="pa-5">
-          <SignIn />
-        </v-card>
-      </v-container>
-    </div>
-  </template>
-  
-  <script>
-  import SignIn from "../components/SignIn.vue";
-  export default {
-    methods: {
-      signOut() {
-        console.log("Signed Out");
-        this.$fire.auth.signOut();
-        window.location = "/login";
-      },
-    },
-    components: { SignIn },
-  };
-  </script>
-  
-  <style></style>
+  <div
+    style="
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 90vh;
+    "
+  >
+    <SignIn />
+  </div>
+</template>
+
+<script>
+import SignIn from "../components/SignIn.vue";
+export default {
+  components: { SignIn },
+};
+</script>
+
+<style></style>

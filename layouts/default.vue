@@ -3,8 +3,6 @@
     <v-navigation-drawer
       class="drawer-container"
       v-model="drawer"
-      :mini-variant="miniVariant"
-      :clipped="clipped"
       dark
       fixed
       app
@@ -41,8 +39,8 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-app-bar :clipped-left="clipped" fixed app>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+    <v-app-bar fixed app>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" v-if="currentUser" />
       <div class="brand-icon-navbar">
         <div class="brand-icon-container">
           <v-icon class="brand-icon">mdi-coffee</v-icon>
@@ -57,30 +55,39 @@
 </template>
 
 <script>
-import Footer from "../components/footer";
+import Footer from "../components/Footer";
 export default {
   name: "DefaultLayout",
   components: { Footer },
+  computed: {
+    currentUser() {
+      return this.$store.state.user;
+    },
+  },
   data() {
     return {
-      clipped: false,
       drawer: false,
       fixed: false,
       items: [
         {
           icon: "mdi-home",
           title: "Inicio",
-          to: "/",
-        },
-        {
-          icon: "mdi-silverware",
-          title: "Menú",
-          to: "/menu",
+          to: "/home",
         },
         {
           icon: "mdi-coffee",
-          title: "Nosotros",
-          to: "/inspire",
+          title: "Productos",
+          to: "/products",
+        },
+        {
+          icon: "mdi-image",
+          title: "Galería",
+          to: "/gallery",
+        },
+        {
+          icon: "mdi-account",
+          title: "Usuarios",
+          to: "/users",
         },
       ],
       miniVariant: false,

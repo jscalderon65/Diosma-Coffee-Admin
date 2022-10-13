@@ -16,7 +16,7 @@ export default function ({ store, redirect, $fire }) {
     if (!store.state.user) {
       redirect("/login");
     } else {
-      if (!emails.includes(store.state.user.email)) {
+      if (!emails.some((e) => e.email === store.state.user.email)) {
         redirect("/login");
         await $fire.auth.signOut();
       }
