@@ -53,6 +53,7 @@ export default {
     "@nuxtjs/axios",
     // https://go.nuxtjs.dev/pwa
     "@nuxtjs/pwa",
+    "vue-sweetalert2/nuxt",
     [
       "@nuxtjs/firebase",
       {
