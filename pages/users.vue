@@ -49,7 +49,7 @@
               outlined
               clearable
             ></v-text-field>
-            <div style="display: flex; justify-content: flex-end">
+            <div class="register-style-button">
               <v-btn :disabled="!newEmail" @click="createUser" outlined
                 ><v-icon class="icon-button-margin">mdi-account-plus</v-icon>
                 Registrar
@@ -234,6 +234,10 @@ export default {
 };
 </script>
 <style scoped>
+.register-style-button {
+  display: flex;
+  justify-content: flex-end;
+}
 .info-text {
   font-size: 1rem;
 }
