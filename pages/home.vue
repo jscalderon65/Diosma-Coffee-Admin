@@ -1,94 +1,62 @@
 <template>
-  <div>
-    <h1>
-      Welcome <span v-if="currentUser">{{ currentUser.displayName }}</span>
-    </h1>
+  <div class="main-container animate__animated animate__fadeIn">
+    <MainTitle text="Administración" />
     <br />
-    <br />
-    <div
-      style="border: solid; display: grid; grid-template-columns: 1fr 1fr 1fr"
+    <v-alert
+      shaped
+      color="primary"
+      dark
+      icon="mdi-home"
+      prominent
+      class="font-styles animate__animated animate__backInLeft"
     >
-      <v-card
-        ><v-img
-          v-if="urlImage"
-          style="
-            border-radius: 100%;
-            width: 200px;
-            height: 200px;
-            border: solid white;
-          "
-          contain
-          lazy-src="https://picsum.photos/seed/picsum/200/300"
-          :src="urlImage"
-        ></v-img
-      ></v-card>
-      <v-card
-        ><v-img
-          v-if="urlImage"
-          style="
-            border-radius: 100%;
-            width: 200px;
-            height: 200px;
-            border: solid white;
-          "
-          contain
-          lazy-src="https://picsum.photos/seed/picsum/200/300"
-          :src="urlImage"
-        ></v-img
-      ></v-card>
-      <v-card
-        ><v-img
-          v-if="urlImage"
-          style="
-            border-radius: 100%;
-            width: 200px;
-            height: 200px;
-            border: solid white;
-          "
-          contain
-          lazy-src="https://picsum.photos/seed/picsum/200/300"
-          :src="urlImage"
-        ></v-img
-      ></v-card>
-      <v-card
-        ><v-img
-          v-if="urlImage"
-          style="
-            border-radius: 100%;
-            width: 200px;
-            height: 200px;
-            border: solid white;
-          "
-          contain
-          lazy-src="https://picsum.photos/seed/picsum/200/300"
-          :src="urlImage"
-        ></v-img
-      ></v-card>
-    </div>
-
-    <br />
-    {{ title }}
-    <input v-if="urlImage" type="text" v-model="title" />
-    <input type="file" @change="uploadImage" accept="image/*" />
-    <br />
-    <br />
-    <v-btn @click="signOutPopup">LogOut</v-btn>
-    <br />
-    <br />
-    <p v-if="loading">Loading....</p>
-    <div
-      style="border: solid"
-      v-else
-      v-for="(data, index) in dataFirebase"
-      :key="index"
+      Bienvenid@ al dashboar de administración de la plataforma de Diosma Café,
+      este es un aplicativo en el que se podrá gestionar la información que se
+      presenta en la plataforma principal.
+    </v-alert>
+    <v-alert
+      shaped
+      color="secondary"
+      dark
+      icon="mdi-coffee"
+      prominent
+      class="font-styles animate__animated animate__backInRight"
     >
-      {{ data }}
-    </div>
+      Se podrán realizar operaciones de edición, eliminación, creación, lectura
+      y activación y desactivación temporal de los productos ofertados en la
+      plataforma principal.
+    </v-alert>
+    <v-alert
+      shaped
+      color="info"
+      dark
+      icon="mdi-image"
+      prominent
+      class="font-styles animate__animated animate__backInLeft"
+    >
+      Además se podrán eliminar y subir imágenes que alimentarán la galería de
+      la plataforma principal.
+    </v-alert>
+    <v-alert
+      shaped
+      color="alert"
+      dark
+      icon="mdi-account"
+      prominent
+      class="font-styles animate__animated animate__backInRight"
+    >
+      Por último, existe una funcionalidad de administración de usuarios
+      permitidos para ingresar a la plataforma, solo los usuarios registrados
+      podrán crear y eliminar nuevos usuarios validos para acceder a esta
+      plataforma de administración.
+    </v-alert>
   </div>
 </template>
 
 <script>
+import MainTitle from "../components/MainTitle";
 export default {
+  components: { MainTitle },
   name: "IndexPage",
   middleware: "auth",
   computed: {
@@ -132,3 +100,19 @@ export default {
   },
 };
 </script>
+<style scoped>
+.main-container {
+  min-height: 100vh;
+  height: auto;
+  padding: 30px;
+}
+.container-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  justify-content: center;
+  grid-gap: 10px;
+}
+.font-styles {
+  font-size: 1.2rem;
+}
+</style>

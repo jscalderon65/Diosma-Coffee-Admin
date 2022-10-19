@@ -1,5 +1,5 @@
 <template>
-  <div class="gallery-main-container">
+  <div class="gallery-main-container animate__animated animate__fadeIn">
     <MainTitle text="Galería" />
     <br />
     <input
@@ -121,7 +121,7 @@ import MainTitle from "../components/MainTitle";
 export default {
   name: "InspirePage",
   middleware: "auth",
-  comments: { MainTitle },
+  components: { MainTitle },
   data() {
     return {
       gallery: [],

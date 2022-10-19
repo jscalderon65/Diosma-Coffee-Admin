@@ -82,7 +82,7 @@
 import MainTitle from "../components/MainTitle";
 import moment from "moment";
 export default {
-  comments: { MainTitle },
+  components: { MainTitle },
   middleware: "auth",
   computed: {
     currentUser() {

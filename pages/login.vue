@@ -1,12 +1,5 @@
 <template>
-  <div
-    style="
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 90vh;
-    "
-  >
+  <div class="login-main-container animate__animated animate__fadeIn">
     <SignIn />
   </div>
 </template>
@@ -18,4 +11,11 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped>
+.login-main-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+}
+</style>
