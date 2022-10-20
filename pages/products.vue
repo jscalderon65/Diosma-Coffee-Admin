@@ -211,7 +211,8 @@ export default {
             .map((pr) => {
               return pr.products.map((p) => ({ ...p, section: pr.section }));
             })
-            .flat();
+            .flat()
+            .reverse();
           this.sections = this.products.map((pr) => {
             return pr.section;
           });
@@ -249,7 +250,7 @@ export default {
           };
           const actualProductsData = await this.getProductsData();
           if (actualProductsData) {
-            if (this.section.includes(this.section)) {
+            if (this.sections.includes(this.section)) {
               const newProductsList = actualProductsData.map((pr) => {
                 if (pr.section === this.section) {
                   pr.products = [...pr.products, payload];
@@ -282,7 +283,7 @@ export default {
                 });
               this.$swal(
                 "Exito",
-                "Se ha creado con exito el producto",
+                "Se ha creado con exito la sección y el producto",
                 "success"
               );
               await this.getProducts();
