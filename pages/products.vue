@@ -83,11 +83,6 @@
             </template>
             <v-list>
               <v-list-item>
-                <v-btn small @click="productDetails(item)">
-                  <v-icon big color="primary"> mdi-eye </v-icon>
-                </v-btn>
-              </v-list-item>
-              <v-list-item>
                 <v-btn small @click="editProduct(item)">
                   <v-icon big color="info"> mdi-pencil </v-icon>
                 </v-btn>
@@ -123,50 +118,7 @@ export default {
   components: { MainTitle },
   data() {
     return {
-      products: [
-        /*  {
-          section: "Café",
-          products: [
-            {
-              id: JSON.stringify(new Date()),
-              name: "Café semi descremado",
-              imageUrl: "https://picsum.photos/200/300",
-              createdBy: "jscalderon@gmail.com",
-              price: "30000",
-              createdAt: "10/20/2022",
-              isAvailable: true,
-            },
-          ],
-        },
-        {
-          section: "Licor",
-          products: [
-            {
-              id: "aaaaaaaaaaaaaaaaaaaaaaaaaaa",
-              name: "Licor!",
-              imageUrl: "https://picsum.photos/200/300",
-              price: "30000",
-              createdBy: "jscalderon@gmail.com",
-              createdAt: "10/20/2022",
-              isAvailable: true,
-            },
-          ],
-        },
-        {
-          section: "Alimentos",
-          products: [
-            {
-              id: "fffffffffffffffffffffff",
-              name: "Comida",
-              imageUrl: "https://picsum.photos/200/300",
-              createdBy: "jscalderon@gmail.com",
-              createdAt: "10/20/2022",
-              price: "30000",
-              isAvailable: true,
-            },
-          ],
-        }, */
-      ],
+      products: [],
       search: "",
       tableProducts: [],
       headers: [
