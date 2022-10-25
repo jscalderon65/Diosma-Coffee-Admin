@@ -17,6 +17,7 @@
           label="Nombre del producto"
           required
         ></v-text-field>
+        <br />
         <v-text-field
           v-model="price"
           :rules="requiredRules"
@@ -24,13 +25,14 @@
           label="Precio del producto"
           required
         ></v-text-field>
+        <br />
         <v-checkbox
           v-if="sections.length > 0"
           v-model="checkbox"
           label="Usar secciones existentes?"
         ></v-checkbox>
         <v-select
-          v-if="checkbox"
+          v-if="sections.length > 0 && checkbox"
           v-model="section"
           :items="this.sections"
           :rules="requiredRules"
@@ -45,6 +47,15 @@
           label="Nombre de la nueva sección"
           required
         ></v-text-field>
+        <br />
+        <v-file-input
+          :rules="requiredRules"
+          accept="image/*"
+          label="Sube una imagen"
+          required
+          @change="getMainImage"
+        ></v-file-input>
+        <br />
         <div style="text-align: center">
           <v-btn @click="createProduct" v-if="!loadingCreateProduct" outlined
             ><v-icon class="icon-button-margin">mdi-plus</v-icon>
@@ -53,6 +64,10 @@
         </div>
         <br />
       </v-form>
+      <div v-if="loadingCreateProduct">
+        <v-progress-linear indeterminate color="primary"></v-progress-linear>
+        <br />
+      </div>
     </div>
     <br />
     <v-card>
@@ -83,7 +98,7 @@
             </template>
             <v-list>
               <v-list-item>
-                <v-btn small @click="editProduct(item)">
+                <v-btn small @click="openEditDialog(item)">
                   <v-icon big color="info"> mdi-pencil </v-icon>
                 </v-btn>
               </v-list-item>
@@ -105,6 +120,78 @@
         <template v-slot:no-data> No hay productos registrados </template>
       </v-data-table>
     </v-card>
+    <v-dialog
+      v-model="editDialog"
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-toolbar dark>
+          <v-btn icon dark @click="closeEditDialog">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-toolbar-items>
+            <v-btn dark @click="editProduct" outlined
+              ><v-icon class="icon-button-margin">mdi-content-save</v-icon>
+              Guardar cambios
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card-text style="padding: 20px; margin-top: 20px">
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-text-field
+              v-model="editItem.name"
+              :counter="30"
+              :rules="nameRules"
+              label="Nombre del producto"
+              required
+            ></v-text-field>
+            <br />
+            <v-text-field
+              v-model="editItem.price"
+              :rules="requiredRules"
+              type="number"
+              label="Precio del producto"
+              required
+            ></v-text-field>
+            <div style="display: flex; flex-flow: column">
+              <v-img
+                style="
+                  align-self: center !important;
+                  border: solid;
+                  width: 200px;
+                  height: 200px;
+                  border-radius: 100%;
+                "
+                :src="editItem.imageUrl"
+              ></v-img>
+              <br />
+              <div
+                v-if="!changeImage"
+                style="display: flex; justify-content: center"
+              >
+                <v-btn @click="changeImage = true" outlined>
+                  <v-icon class="icon-button-margin"
+                    >mdi-swap-horizontal</v-icon
+                  >
+                  Cambiar imagen</v-btn
+                >
+              </div>
+            </div>
+            <v-file-input
+              v-if="changeImage"
+              :rules="requiredRules"
+              accept="image/*"
+              label="Sube una imagen"
+              required
+              @change="getMainImage"
+            ></v-file-input>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -121,6 +208,9 @@ export default {
       products: [],
       search: "",
       tableProducts: [],
+      editDialog: false,
+      loadingEditDialog: false,
+      changeImage: false,
       headers: [
         {
           text: "Nombre",
@@ -168,7 +258,7 @@ export default {
       nameRules: [
         (v) => !!v || "Campo requerido",
         (v) =>
-          (v && v.length <= 15) || "El nombre no debe superar las 30 letras",
+          (v && v.length <= 30) || "El nombre no debe superar las 30 letras",
       ],
       sectionRules: [
         (v) => !!v || "Campo requerido",
@@ -183,6 +273,8 @@ export default {
       sections: [],
       loadingCreateProduct: false,
       loadingTableData: false,
+      formImage: null,
+      editItem: { name: "", price: "" },
     };
   },
   watch: {
@@ -202,6 +294,9 @@ export default {
     this.getProducts();
   },
   methods: {
+    async getMainImage(e) {
+      this.formImage = e;
+    },
     async getProducts() {
       try {
         this.loadingTableData = true;
@@ -234,15 +329,19 @@ export default {
     async createProduct() {
       if (this.$refs.form.validate()) {
         this.name = this.name.trim();
-        this.price = this.price.trim();
+        this.price = this.price;
         this.section = this.section.trim();
         try {
           this.loadingCreateProduct = true;
           const serverIdProduct = uid(16);
+          const serverImageName = this.name + " " + serverIdProduct;
+          const ref = this.$fire.storage.ref("Images").child(serverImageName);
+          await ref.put(this.formImage);
+          const urlUploadedImage = await ref.getDownloadURL();
           const payload = {
             id: serverIdProduct,
             name: this.name,
-            imageUrl: "https://picsum.photos/200/300",
+            imageUrl: urlUploadedImage,
             createdBy: this.currentUser.email,
             createdAt: moment().format("dddd MM, [del] YYYY hh:mm:ss a"),
             price: this.price,
@@ -312,6 +411,73 @@ export default {
         }
       }
     },
+    openEditDialog(item) {
+      this.editDialog = true;
+      this.editItem = item;
+    },
+    async editProduct(item) {
+      this.closeEditDialog();
+    },
+    closeEditDialog() {
+      this.editDialog = false;
+      this.editItem = null;
+    },
+    async deleteProduct(item) {
+      console.log(item);
+      this.$swal
+        .fire({
+          title: "¿Estás segur@ de eliminar el producto?",
+          text: "Esta acción es irreversible",
+          showDenyButton: true,
+          confirmButtonText: "Si",
+          denyButtonText: `No`,
+        })
+        .then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              this.$swal.fire({
+                title: "Por favor espera",
+                icon: "info",
+                html: "Eliminando producto...", // add html attribute if you want or remove
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                onBeforeOpen: () => {
+                  this.$swal.showLoading();
+                },
+              });
+              const actualProductsData = await this.getProductsData();
+              const newProductsList = actualProductsData.map((pr) => {
+                if (pr.section === item.section) {
+                  pr.products = pr.products.filter((p) => p.id !== item.id);
+                  return pr;
+                }
+                return pr;
+              });
+              await this.$fire.firestore
+                .collection("Products")
+                .doc("Menu")
+                .set({
+                  data: newProductsList,
+                });
+              const ref = this.$fire.storage
+                .ref("Images")
+                .child(item.name + " " + item.id);
+              await ref.delete();
+              this.$swal.close();
+              this.$swal.fire(
+                "Exito",
+                "Producto eliminado con exito",
+                "success"
+              );
+              await this.getProducts();
+            } catch (error) {
+              console.log(error);
+              this.$swal.close();
+              this.$swal("Error", "Error al eliminar producto", "error");
+            }
+          }
+        });
+    },
     cleanProductForm() {
       this.name = null;
       this.price = null;
@@ -319,9 +485,6 @@ export default {
       this.checkbox = false;
       this.resetValidation();
     },
-    productDetails() {},
-    editProduct() {},
-    deleteProduct() {},
     validate() {
       this.$refs.form.validate();
     },
@@ -335,6 +498,9 @@ export default {
 };
 </script>
 <style scoped>
+.icon-button-margin {
+  margin-right: 10px;
+}
 .img-table-container {
   padding: 10px;
   display: flex;
@@ -352,9 +518,9 @@ export default {
   padding: 30px;
 }
 .form-container {
-  border: solid 5px;
+  border: solid 8px;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 10px;
 }
 .form-create-title {
   font-family: Permanent Marker;
