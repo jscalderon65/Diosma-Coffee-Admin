@@ -56,7 +56,7 @@
           @change="getMainImage"
         ></v-file-input>
         <br />
-        <div style="text-align: center">
+        <div class="create-button-container">
           <v-btn @click="createProduct" v-if="!loadingCreateProduct" outlined
             ><v-icon class="icon-button-margin">mdi-plus</v-icon>
             Crear
@@ -117,6 +117,14 @@
             </div>
           </div>
         </template>
+        <template v-slot:[`item.isAvailable`]="{ item }">
+          <div class="img-table-container">
+            <v-icon color="green" v-if="item.isAvailable"
+              >mdi-check-circle</v-icon
+            >
+            <v-icon color="red" v-else>mdi-cancel</v-icon>
+          </div>
+        </template>
         <template v-slot:no-data> No hay productos registrados </template>
       </v-data-table>
     </v-card>
@@ -139,7 +147,14 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card-text style="padding: 20px; margin-top: 20px">
+        <v-card-text class="edit-card-text-dialog">
+          <div v-if="loadingEditDialog">
+            <v-progress-linear
+              indeterminate
+              color="primary"
+            ></v-progress-linear>
+            <br />
+          </div>
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-text-field
               v-model="editItem.name"
@@ -156,22 +171,23 @@
               label="Precio del producto"
               required
             ></v-text-field>
-            <div style="display: flex; flex-flow: column">
+            <v-checkbox
+              v-model="editItem.isAvailable"
+              label="¿Producto disponible?"
+            ></v-checkbox>
+            <div class="edit-image-container">
               <v-img
-                style="
-                  align-self: center !important;
-                  border: solid;
-                  width: 200px;
-                  height: 200px;
-                  border-radius: 100%;
-                "
+                v-if="!previewTemporalLink"
+                class="edit-image-preview"
                 :src="editItem.imageUrl"
               ></v-img>
+              <v-img
+                v-else
+                class="edit-image-temporal-link"
+                :src="previewTemporalLink"
+              ></v-img>
               <br />
-              <div
-                v-if="!changeImage"
-                style="display: flex; justify-content: center"
-              >
+              <div v-if="!changeImage" class="edit-button-image-container">
                 <v-btn @click="changeImage = true" outlined>
                   <v-icon class="icon-button-margin"
                     >mdi-swap-horizontal</v-icon
@@ -186,7 +202,7 @@
               accept="image/*"
               label="Sube una imagen"
               required
-              @change="getMainImage"
+              @change="getEditImage"
             ></v-file-input>
           </v-form>
         </v-card-text>
@@ -245,6 +261,13 @@ export default {
           align: "center",
         },
         {
+          text: "Habilitado",
+          value: "isAvailable",
+          filterable: false,
+          sortable: false,
+          align: "center",
+        },
+        {
           text: "Acciones",
           value: "actions",
           filterable: false,
@@ -274,7 +297,10 @@ export default {
       loadingCreateProduct: false,
       loadingTableData: false,
       formImage: null,
-      editItem: { name: "", price: "" },
+      editItem: { name: "", price: "", imageUrl: "" },
+      previewImage: "",
+      previewTemporalLink: "",
+      oldItem: null,
     };
   },
   watch: {
@@ -294,6 +320,20 @@ export default {
     this.getProducts();
   },
   methods: {
+    getEditImage(e) {
+      if (e) {
+        try {
+          this.previewImage = e;
+          this.previewTemporalLink = URL.createObjectURL(this.previewImage);
+        } catch (error) {
+          this.$swal("Error", "Error al subir imagen", "error");
+        }
+      } else {
+        this.previewImage = "";
+        this.previewTemporalLink = "";
+        this.changeImage = false;
+      }
+    },
     async getMainImage(e) {
       this.formImage = e;
     },
@@ -412,18 +452,94 @@ export default {
       }
     },
     openEditDialog(item) {
+      console.log(item);
       this.editDialog = true;
       this.editItem = item;
+      this.oldItem = item;
     },
-    async editProduct(item) {
-      this.closeEditDialog();
+    async editProduct() {
+      try {
+        if (this.$refs.form.validate()) {
+          this.loadingEditDialog = true;
+          const actualProductsData = await this.getProductsData();
+          if (this.previewImage) {
+            const ref = this.$fire.storage
+              .ref("Images")
+              .child(this.editItem.name + " " + this.editItem.id);
+            await ref.put(this.previewImage);
+            const urlUploadedImage = await ref.getDownloadURL();
+            const newProductsList = actualProductsData.map((pr) => {
+              if (pr.section === this.editItem.section) {
+                pr.products = pr.products.map((p) => {
+                  if (p.id === this.editItem.id) {
+                    return {
+                      ...p,
+                      name: this.editItem.name,
+                      price: this.editItem.price,
+                      imageUrl: urlUploadedImage,
+                      isAvailable: this.editItem.isAvailable,
+                    };
+                  }
+                  return p;
+                });
+                return pr;
+              }
+              return pr;
+            });
+            await this.$fire.firestore.collection("Products").doc("Menu").set({
+              data: newProductsList,
+            });
+            this.$swal(
+              "Exito",
+              "Se ha editado con exito el producto",
+              "success"
+            );
+            await this.getProducts();
+            this.changeImage = false;
+            this.previewImage = "";
+          } else {
+            const newProductsList = actualProductsData.map((pr) => {
+              if (pr.section === this.editItem.section) {
+                pr.products = pr.products.map((p) => {
+                  if (p.id === this.editItem.id) {
+                    return {
+                      ...p,
+                      name: this.editItem.name,
+                      price: this.editItem.price,
+                      isAvailable: this.editItem.isAvailable,
+                    };
+                  }
+                  return p;
+                });
+                return pr;
+              }
+              return pr;
+            });
+            await this.$fire.firestore.collection("Products").doc("Menu").set({
+              data: newProductsList,
+            });
+            this.$swal(
+              "Exito",
+              "Se ha editado con exito el producto",
+              "success"
+            );
+            await this.getProducts();
+          }
+          this.loadingEditDialog = false;
+          this.closeEditDialog();
+        }
+      } catch (e) {
+        console.log(e);
+        this.loadingEditDialog = false;
+        this.closeEditDialog();
+        this.$swal("Error", "Error al editar producto", "error");
+      }
     },
     closeEditDialog() {
       this.editDialog = false;
-      this.editItem = null;
+      this.editItem = { name: "", price: "" };
     },
     async deleteProduct(item) {
-      console.log(item);
       this.$swal
         .fire({
           title: "¿Estás segur@ de eliminar el producto?",
@@ -524,6 +640,35 @@ export default {
 }
 .form-create-title {
   font-family: Permanent Marker;
+}
+.edit-card-text-dialog {
+  padding: 20px;
+  margin-top: 20px;
+}
+.create-button-container {
+  text-align: center;
+}
+.edit-image-container {
+  display: flex;
+  flex-flow: column;
+}
+.edit-image-preview {
+  align-self: center !important;
+  border: solid;
+  width: 200px;
+  height: 200px;
+  border-radius: 100%;
+}
+.edit-image-temporal-link {
+  align-self: center !important;
+  border: solid;
+  width: 200px;
+  height: 200px;
+  border-radius: 100%;
+}
+.edit-button-image-container {
+  display: flex;
+  justify-content: center;
 }
 @media (max-width: 700px) {
   .form-create-title {
