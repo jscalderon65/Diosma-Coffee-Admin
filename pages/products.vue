@@ -49,11 +49,11 @@
         ></v-text-field>
         <br />
         <v-file-input
+          v-model="formImage"
           :rules="requiredRules"
           accept="image/*"
           label="Sube una imagen"
           required
-          @change="getMainImage"
         ></v-file-input>
         <br />
         <div class="create-button-container">
