@@ -72,7 +72,7 @@ export default {
         {
           icon: "mdi-home",
           title: "Inicio",
-          to: "/home",
+          to: "/",
         },
         {
           icon: "mdi-coffee",
@@ -88,6 +88,11 @@ export default {
           icon: "mdi-account",
           title: "Usuarios",
           to: "/users",
+        },
+        {
+          icon: "mdi-arrow-left-thin-circle-outline",
+          title: "Salir",
+          to: "/login",
         },
       ],
       miniVariant: false,

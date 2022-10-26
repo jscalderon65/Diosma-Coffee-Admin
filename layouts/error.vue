@@ -16,7 +16,7 @@
           <br />
           <div style="display: flex; justify-content: center">
             <button class="main-button menu-button">
-              <a href="/home"> Inicio </a>
+              <a href="/"> Inicio </a>
             </button>
           </div>
         </div>

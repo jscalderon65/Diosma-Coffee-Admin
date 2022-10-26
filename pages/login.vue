@@ -8,6 +8,15 @@
 import SignIn from "../components/SignIn.vue";
 export default {
   components: { SignIn },
+  created() {
+    this.signOut();
+  },
+  methods: {
+    async signOut() {
+      console.log("Signed Out");
+      await this.$fire.auth.signOut();
+    },
+  },
 };
 </script>
 
