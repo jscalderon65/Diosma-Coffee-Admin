@@ -7,8 +7,6 @@
       :items="users"
       :loading="loadingUsers"
       class="elevation-1"
-      hide-default-footer
-      disable-pagination
     >
       <template v-slot:top>
         <div class="container-buttons-table">

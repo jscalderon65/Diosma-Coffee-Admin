@@ -86,8 +86,6 @@
         :loading="loadingTableData"
         :search="search"
         class="elevation-1"
-        hide-default-footer
-        disable-pagination
       >
         <template v-slot:[`item.actions`]="{ item }">
           <v-menu offset-y>
@@ -573,7 +571,7 @@ export default {
                 .collection("Products")
                 .doc("Menu")
                 .set({
-                  data: newProductsList,
+                  data: newProductsList.filter((pr) => pr.products.length > 0),
                 });
               const ref = this.$fire.storage
                 .ref("Images")
@@ -599,6 +597,7 @@ export default {
       this.price = null;
       this.section = null;
       this.checkbox = false;
+      this.formImage = null;
       this.resetValidation();
     },
     validate() {
@@ -624,6 +623,7 @@ export default {
   align-items: center;
 }
 .img-table-style {
+  border: solid;
   border-radius: 100%;
   width: 50px;
   height: 50px;
