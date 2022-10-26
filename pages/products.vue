@@ -153,7 +153,7 @@
             ></v-progress-linear>
             <br />
           </div>
-          <v-form ref="form" v-model="valid" lazy-validation>
+          <v-form ref="formEdit" v-model="validEdit" lazy-validation>
             <v-text-field
               v-model="editItem.name"
               :counter="30"
@@ -274,6 +274,7 @@ export default {
         },
       ],
       valid: true,
+      validEdit: true,
       name: "",
       requiredRules: [(v) => !!v || "Campo requerido"],
       nameRules: [
@@ -457,7 +458,7 @@ export default {
     },
     async editProduct() {
       try {
-        if (this.$refs.form.validate()) {
+        if (this.$refs.formEdit.validate()) {
           this.loadingEditDialog = true;
           const actualProductsData = await this.getProductsData();
           if (this.previewImage) {
